@@ -135,6 +135,41 @@ When switching to Full Charge Mode:
 - **Automation**: You can bind the script to a keyboard shortcut or create a desktop launcher for quick toggling.
 - **Thresholds are not persistent**: These sysfs values reset on reboot. To make Longevity Mode the default at boot, add the script to your startup routine or use a systemd service/udev rule.
 
+## Battery Recalibration
+
+If you notice your battery percentage behaving erratically — such as suddenly jumping from ~50% down to single digits — your battery's fuel gauge has likely drifted. The fuel gauge is a chip inside the battery that estimates remaining capacity based on a learned voltage curve. Over time, as the battery ages and internal resistance increases, that curve becomes inaccurate, and the reported percentage no longer reflects reality.
+
+To fix this, you can perform a full recalibration using TLP:
+
+```bash
+sudo tlp recalibrate BAT0
+```
+
+This command performs a complete discharge-recharge cycle to reset the fuel gauge:
+
+1. Sets charge thresholds to 100% so the battery charges fully
+2. Waits for the battery to reach 100% (laptop must be plugged in)
+3. Force-discharges the battery via the ThinkPad's ACPI interface while still on AC power (so you don't lose power during the process)
+4. Recharges back to 100%
+
+By cycling from full to empty and back, the embedded controller re-learns the actual voltage-to-percentage mapping, which corrects the reporting drift.
+
+### Recalibration Requirements
+
+- **TLP** must be installed: `sudo dnf install tlp`
+- **acpi_call kernel module** (for ThinkPads): `sudo dnf install akmod-acpi_call`
+- The laptop must stay **plugged in** for the entire process
+- The process takes **several hours** — avoid heavy use during recalibration
+- On newer ThinkPad Gen 4+ models, the force-discharge ACPI call may not be supported
+
+### When to Recalibrate
+
+- When battery percentage jumps or drops unexpectedly
+- When the reported capacity seems inconsistent with actual usage time
+- As a general maintenance step every few months
+
+A kernel or firmware update (e.g., upgrading Fedora) can also improve battery reporting accuracy, as newer kernels include fixes to the `power_supply` ACPI subsystem that improve how charge levels are read and interpolated.
+
 ## Notes
 
 - The charge thresholds are applied at the kernel/firmware level and take effect immediately.
