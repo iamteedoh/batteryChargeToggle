@@ -1,5 +1,10 @@
 #!/bin/bash
 
+## Author: Tito Valentin
+## Name of Program: battery-toggle.sh
+## Date Created: 2026-02-26
+## Description: Toggles battery charge thresholds between Longevity Mode (75-80%) and Full Charge Mode (0-100%)
+
 BAT="/sys/class/power_supply/BAT0"
 STOP_FILE="$BAT/charge_stop_threshold"
 START_FILE="$BAT/charge_start_threshold"
