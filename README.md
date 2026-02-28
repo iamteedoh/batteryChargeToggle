@@ -1,4 +1,4 @@
-# Laptop Battery Charge Toggle (Linux) 
+# Laptop Battery Charge Toggle (Linux)
 
 A simple Bash script for Linux laptops that toggles between two battery charging modes:
 
