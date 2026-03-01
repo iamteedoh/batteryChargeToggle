@@ -1,6 +1,6 @@
 # Laptop Battery Charge Toggle (Linux)
 
-A Bash script for Linux laptops that toggles between two battery charging modes:
+A simple Bash script for Linux laptops that toggles between two battery charging modes:
 
 - **Longevity Mode** — Limits charging between 75%-80% to preserve long-term battery health.
 - **Full Charge Mode** — Allows charging up to 100% for when you need maximum battery life on the go.
