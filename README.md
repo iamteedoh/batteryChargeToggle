@@ -2,10 +2,11 @@
 
 # Laptop Battery Charge Toggle (Linux)
 
-A simple Bash script for Linux laptops that toggles between two battery charging modes:
+A simple Bash script for Linux laptops that toggles between two battery charging modes and displays a detailed battery report:
 
 - **Longevity Mode** — Limits charging between 75%-80% to preserve long-term battery health.
 - **Full Charge Mode** — Allows charging up to 100% for when you need maximum battery life on the go.
+- **Status Mode** — View battery stats without changing anything (works on all hardware).
 
 ## How It Works
 
@@ -26,32 +27,49 @@ After toggling, the script prints a detailed battery report including:
 - Current charging status (Charging, Discharging, Full, etc.)
 - Current charge percentage
 - Charge cycle count
-- Energy levels in Wh (current, full capacity, design capacity)
+- Capacity levels in Wh or mAh (current, full capacity, design capacity)
 - Battery health percentage (full capacity vs. design capacity)
-- Active charge start/stop thresholds
+- Active charge start/stop thresholds (when supported)
+
+You can also run the script with `-s` or `--status` to view the battery report without toggling. This works on all Linux hardware, including laptops that don't support charge thresholds.
 
 ## Requirements
 
-- **Linux** with a battery that exposes sysfs charge threshold controls (`/sys/class/power_supply/BAT0/`)
-- **Root privileges** — The script automatically re-runs itself with `sudo` if not already root
+- **Linux** with a battery that exposes sysfs battery info (`/sys/class/power_supply/BAT0/`)
+- **Root privileges** — Required for toggling charge thresholds (not needed for `--status`). The script automatically re-runs itself with `sudo` if not already root
 - **Bash** shell
 - **awk** (for unit conversion calculations)
 
 ### Compatible Hardware
 
-Most modern laptops with supported battery drivers expose these threshold files. Common supported brands include:
+#### Battery Status (`--status`)
+
+The status report works on any Linux laptop with a `/sys/class/power_supply/BAT0/` directory, including:
+
+- **MacBooks running Linux** — tested on Fedora on a MacBook Pro
+- ThinkPad, ASUS, Huawei, Dell, HP, and other PC laptops
+
+The script automatically detects whether capacity is reported in energy (µWh) or charge (µAh) units and displays values in Wh or mAh accordingly.
+
+#### Charge Threshold Toggling
+
+Toggling between Longevity and Full Charge modes requires kernel-level charge threshold support. Common supported brands include:
 
 - ThinkPad (via `thinkpad_acpi` or `natacpi`)
 - ASUS (via `asus-nb-wmi` or `asus_wmi`)
 - Huawei (via `huawei-wmi`)
 - Other laptops with kernel-level charge threshold support
 
-You can verify compatibility by checking if these files exist:
+> **Note:** MacBooks running Linux do not support charge threshold toggling. The T2/Apple SMC chip controls charging and does not expose threshold files to the Linux kernel. You can still use `--status` to view battery stats.
+
+You can verify threshold support by checking if these files exist:
 
 ```bash
 ls /sys/class/power_supply/BAT0/charge_start_threshold
 ls /sys/class/power_supply/BAT0/charge_stop_threshold
 ```
+
+If these files are not present, the script will still work in `--status` mode but will display an error if you attempt to toggle.
 
 ## Installation
 
@@ -76,13 +94,20 @@ ls /sys/class/power_supply/BAT0/charge_stop_threshold
 
 ## Usage
 
-Run the script directly:
+Toggle between charging modes:
 
 ```bash
 ./battery-toggle.sh
 ```
 
-The script requires root access to write to sysfs files. If not run as root, it will automatically prompt for your sudo password.
+View battery stats without toggling (no root required):
+
+```bash
+./battery-toggle.sh --status
+./battery-toggle.sh -s
+```
+
+Toggling requires root access to write to sysfs files. If not run as root, it will automatically prompt for your sudo password.
 
 ### Example Output
 
@@ -127,6 +152,21 @@ When switching to Full Charge Mode:
   Health:            89.8%
   Start threshold:   0%
   Stop threshold:    100%
+  -------------------------------------------
+```
+
+When viewing status on hardware without threshold support (e.g., MacBook running Linux):
+
+```
+  Battery Report
+  -------------------------------------------
+  Status:            Full
+  Charge:            72%
+  Charge cycles:     328
+  Current capacity:  4800 mAh
+  Full capacity:     5210 mAh
+  Design capacity:   5765 mAh
+  Health:            90.4%
   -------------------------------------------
 ```
 
