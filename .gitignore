@@ -1,0 +1,11 @@
+# Environment files
+.env
+.env.*
+
+# OS artifacts
+.DS_Store
+
+# Editor artifacts
+*.swp
+*.swo
+*~

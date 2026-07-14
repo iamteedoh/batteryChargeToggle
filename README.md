@@ -76,7 +76,7 @@ If these files are not present, the script will still work in `--status` mode bu
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/batteryChargeToggle.git
+   git clone https://github.com/iamteedoh/batteryChargeToggle.git
    cd batteryChargeToggle
    ```
 
@@ -124,7 +124,7 @@ When switching to Longevity Mode:
   Status:            Charging
   Charge:            72%
   Charge cycles:     145
-  Energy now:        38.50 Wh
+  Current capacity:  38.50 Wh
   Full capacity:     51.20 Wh
   Design capacity:   57.00 Wh
   Health:            89.8%
@@ -146,7 +146,7 @@ When switching to Full Charge Mode:
   Status:            Charging
   Charge:            80%
   Charge cycles:     145
-  Energy now:        42.10 Wh
+  Current capacity:  42.10 Wh
   Full capacity:     51.20 Wh
   Design capacity:   57.00 Wh
   Health:            89.8%
@@ -217,6 +217,16 @@ A kernel or firmware update (e.g., upgrading Fedora) can also improve battery re
 - The charge thresholds are applied at the kernel/firmware level and take effect immediately.
 - The thresholds reset to defaults (usually 0/100) on reboot unless persisted via a startup script or tool like TLP.
 - The `BAT0` path may differ on some systems (e.g., `BAT1`). Adjust the `BAT` variable in the script if needed.
+
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for local
+setup, the validation suite, and the pull request process.
+
+## Security
+
+Please report vulnerabilities privately as described in
+[SECURITY.md](SECURITY.md) — not through public GitHub issues.
 
 ## License
 
