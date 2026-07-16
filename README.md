@@ -6,13 +6,13 @@
 [![Patreon](https://img.shields.io/badge/Patreon-support-f96854?logo=patreon)](https://patreon.com/iamteedoh)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-ffdd00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/iamteedoh)
 
-![battery-toggle.sh showing the ASCII title banner, active mode, and a battery report with a colored charge gauge](docs/screenshot.png)
-
 A Bash tool for Linux laptops that switches between battery charging modes and
 displays a detailed, colorful battery report — complete with an ASCII title
 banner and a live charge gauge. It runs both interactively (a menu) and
 non-interactively (flags), so it fits scripts, keybindings, and casual use
 alike.
+
+![battery-toggle.sh showing the ASCII title banner, active mode, and a battery report with a colored charge gauge](docs/screenshot.png)
 
 Charging modes:
 
