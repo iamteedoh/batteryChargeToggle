@@ -6,9 +6,18 @@
 [![Patreon](https://img.shields.io/badge/Patreon-support-f96854?logo=patreon)](https://patreon.com/iamteedoh)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-ffdd00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/iamteedoh)
 
-A simple Bash script for Linux laptops that toggles between two battery charging modes and displays a detailed battery report:
+A Bash tool for Linux laptops that switches between battery charging modes and
+displays a detailed, colorful battery report — complete with an ASCII title
+banner and a live charge gauge. It runs both interactively (a menu) and
+non-interactively (flags), so it fits scripts, keybindings, and casual use
+alike.
+
+![battery-toggle.sh showing the ASCII title banner, active mode, and a battery report with a colored charge gauge](docs/screenshot.png)
+
+Charging modes:
 
 - **Longevity Mode** — Limits charging between 75%-80% to preserve long-term battery health.
+- **Balanced Mode** — Charges between 60%-80%, an everyday middle ground between health and runtime.
 - **Full Charge Mode** — Allows charging up to 100% for when you need maximum battery life on the go.
 - **Status Mode** — View battery stats without changing anything (works on all hardware).
 
@@ -21,12 +30,15 @@ The script reads and writes to the Linux kernel's battery charge threshold files
 /sys/class/power_supply/BAT0/charge_stop_threshold
 ```
 
-Each time you run it, the script checks the current `charge_stop_threshold`:
+When run with no options, the script toggles based on the current
+`charge_stop_threshold`:
 
 - If the stop threshold is **80** (Longevity Mode is active), it switches to **Full Charge Mode** by setting the start threshold to 0 and the stop threshold to 100.
 - Otherwise, it switches to **Longevity Mode** by setting the start threshold to 75 and the stop threshold to 80.
 
-After toggling, the script prints a detailed battery report including:
+To reach a specific mode directly (including Balanced), use `--mode`, or open
+the interactive menu with `-i`/`--interactive` and pick one. After changing the
+thresholds, the script prints a detailed battery report including:
 
 - Current charging status (Charging, Discharging, Full, etc.)
 - Current charge percentage
@@ -98,35 +110,53 @@ If these files are not present, the script will still work in `--status` mode bu
 
 ## Usage
 
-Toggle between charging modes:
-
 ```bash
-./battery-toggle.sh
+./battery-toggle.sh              # toggle Longevity <-> Full Charge, then report
+./battery-toggle.sh -s           # show the battery report without changing anything
+./battery-toggle.sh --status     # (same as -s)
+./battery-toggle.sh -i           # open the interactive menu
+./battery-toggle.sh --mode balanced   # set a specific mode: longevity | balanced | full
+./battery-toggle.sh --no-color   # disable colored output (also honors NO_COLOR)
+./battery-toggle.sh --help       # show usage and exit
 ```
 
-View battery stats without toggling (no root required):
+### Options
 
-```bash
-./battery-toggle.sh --status
-./battery-toggle.sh -s
-```
+| Option | Description |
+| --- | --- |
+| _(none)_ | Toggle between Longevity and Full Charge, then print the report |
+| `-s`, `--status` | Show the battery report without changing anything (no root needed) |
+| `-i`, `--interactive` | Open the interactive menu to choose a mode |
+| `-m`, `--mode MODE` | Set a specific mode: `longevity`, `balanced`, or `full` |
+| `--no-color` | Disable colored output |
+| `-h`, `--help` | Show help and exit |
 
-Toggling requires root access to write to sysfs files. If not run as root, it will automatically prompt for your sudo password.
+Changing modes (toggle, `--mode`, or picking a mode in the menu) requires root
+access to write to sysfs files. If not run as root, the script automatically
+re-runs itself with `sudo` and prompts for your password. Colored output is
+enabled on a terminal and automatically disabled when output is piped, when
+`--no-color` is passed, or when the `NO_COLOR` environment variable is set.
 
 ### Example Output
 
-When switching to Longevity Mode:
+Running the script shows a title banner, the active mode, and a battery report
+with a colored charge gauge. For example, when switching to Longevity Mode:
 
 ```
-  ===========================================
-  Mode: Longevity
+   ____    _  _____ _____ _____ ______   __
+  | __ )  / \|_   _|_   _| ____|  _ \ \ / /
+  |  _ \ / _ \ | |   | | |  _| | |_) \ V /
+  | |_) / ___ \| |   | | | |___|  _ < | |
+  |____/_/   \_\_|   |_| |_____|_| \_\|_|
+  Toggle laptop charge thresholds and view a battery report.
+
+  ▸ Mode: Longevity
   Charging between 75%-80% — preserving battery health.
-  ===========================================
 
   Battery Report
-  -------------------------------------------
+  ────────────────────────────────────────────
   Status:            Charging
-  Charge:            72%
+  Charge:            [███████████████░░░░░░░] 72%
   Charge cycles:     145
   Current capacity:  38.50 Wh
   Full capacity:     51.20 Wh
@@ -134,44 +164,39 @@ When switching to Longevity Mode:
   Health:            89.8%
   Start threshold:   75%
   Stop threshold:    80%
-  -------------------------------------------
+  ────────────────────────────────────────────
 ```
 
-When switching to Full Charge Mode:
+### Interactive Menu
+
+Run `./battery-toggle.sh -i` for a menu that shows the current battery report
+and lets you pick a mode, refresh the report, or quit:
 
 ```
-  ===========================================
-  Mode: Full Charge
-  Charging to 100% — plug in and top off!
-  ===========================================
-
-  Battery Report
-  -------------------------------------------
-  Status:            Charging
-  Charge:            80%
-  Charge cycles:     145
-  Current capacity:  42.10 Wh
-  Full capacity:     51.20 Wh
-  Design capacity:   57.00 Wh
-  Health:            89.8%
-  Start threshold:   0%
-  Stop threshold:    100%
-  -------------------------------------------
+  Select an option:
+    1) Longevity    (75-80%)   preserve battery health
+    2) Balanced     (60-80%)   everyday middle ground
+    3) Full Charge  (0-100%)   maximum runtime
+    4) Refresh battery report
+    5) Quit
+  Choice:
 ```
 
-When viewing status on hardware without threshold support (e.g., MacBook running Linux):
+On hardware without charge threshold support (e.g., a MacBook running Linux),
+the menu still shows the battery report and refresh/quit options, and `--status`
+works everywhere:
 
 ```
   Battery Report
-  -------------------------------------------
+  ────────────────────────────────────────────
   Status:            Full
-  Charge:            72%
+  Charge:            [███████████████████░░░] 90%
   Charge cycles:     328
   Current capacity:  4800 mAh
   Full capacity:     5210 mAh
   Design capacity:   5765 mAh
   Health:            90.4%
-  -------------------------------------------
+  ────────────────────────────────────────────
 ```
 
 ### Tips
